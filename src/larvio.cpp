@@ -95,7 +95,7 @@ bool LarVio::loadParameters() {
   feature_observation_noise = fsSettings["noise_feature"];  
 
   // Use variance instead of standard deviation.
-  imu_gyro_noise *= imu_gyro_noise;
+  imu_gyro_noise *= imu_gyro_noise; // *= : Multiply AND assignment operator, It multiplies right operand with the left operand and assign the result to left operand.
   imu_acc_noise *= imu_acc_noise;
   imu_gyro_bias_noise *= imu_gyro_bias_noise;
   imu_acc_bias_noise *= imu_acc_bias_noise;
@@ -315,7 +315,7 @@ bool LarVio::initialize() {
   if (!loadParameters()) return false;
 
   // debug log
-  fImuState.open((output_dir+"msckf_2_state.txt").c_str(), ofstream::trunc);
+  fImuState.open((output_dir+"stamped_traj_estimate.txt").c_str(), ofstream::trunc);
   fTakeOffStamp.open((output_dir+"msckf_2_takeoff.txt").c_str(), ofstream::trunc);
 
   // Initialize state server
@@ -443,14 +443,18 @@ bool LarVio::processFeatures(MonoCameraMeasurementPtr msg,
   double tx = state_server.imu_state.t_cam0_imu(0);
   double ty = state_server.imu_state.t_cam0_imu(1);
   double tz = state_server.imu_state.t_cam0_imu(2);
-  fImuState << state_server.imu_state.time-take_off_stamp << " "
-      << qw << " " << qx << " " << qy << " " << qz << " "
-      << vx << " " << vy << " " << vz << " "
+  // fImuState << state_server.imu_state.time-take_off_stamp << " "
+  //     << qw << " " << qx << " " << qy << " " << qz << " "
+  //     << vx << " " << vy << " " << vz << " "
+  //     << px << " " << py << " " << pz << " "
+  //     << bgx << " " << bgy << " " << bgz << " "
+  //     << bax << " " << bay << " " << baz << " "
+  //     << qbcw << " " << qbcx << " " << qbcy << " " << qbcz << " "
+  //     << tx << " " << ty << " " << tz << endl;
+  fImuState << state_server.imu_state.time << " "
       << px << " " << py << " " << pz << " "
-      << bgx << " " << bgy << " " << bgz << " "
-      << bax << " " << bay << " " << baz << " "
-      << qbcw << " " << qbcx << " " << qbcy << " " << qbcz << " "
-      << tx << " " << ty << " " << tz << endl;
+      << qx << " " << qy << " " << qz << " " << qw << " "
+      << endl;
 
   // Update active_slam_features for visualization
   for (auto fid : state_server.feature_states) {
